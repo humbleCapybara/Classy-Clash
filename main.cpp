@@ -8,19 +8,20 @@ int main(){
     float speed = 4.0;
     float scale = 4.0;
     InitWindow(windowWidth, windowHeight, "Classy Clash");
+    // Loading textures
     Texture2D map = LoadTexture("nature_tileset/OpenWorldMap24x24.png");
     Texture2D knight = LoadTexture("characters/knight_idle_spritesheet.png");
+    float rightLeft{1.f};
     Vector2 knightPos{
         (float)windowWidth / 2.0f - scale * (0.5f * (float)knight.width / 6),
         (float)windowHeight / 2.0f - scale * (0.5f * (float)knight.height)
     };
-    
     Vector2 mapPos = {0.0, 0.0};
     SetTargetFPS(fps);
     while(!WindowShouldClose()){
         BeginDrawing();
-            ClearBackground(BLACK);
-            Vector2 direction;
+            ClearBackground(WHITE);
+            Vector2 direction{};
             if (IsKeyDown(KEY_A)) direction.x -= 1.0;
             if (IsKeyDown(KEY_D)) direction.x += 1.0;
             if (IsKeyDown(KEY_W)) direction.y -= 1.0;
@@ -28,11 +29,22 @@ int main(){
             if (Vector2Length(direction) != 0.0){
                 // Set mapPos = mapPos - direction
                 mapPos = Vector2Subtract(mapPos,Vector2Scale(Vector2Normalize(direction),speed));
+                direction.x < 0.f ? rightLeft = -1.f : rightLeft = 1.f;
             }
             DrawTextureEx(map, mapPos, 0, 4.0, WHITE);
+            Rectangle knightSourceRec{0,0,rightLeft * (float)knight.width / 6.0f,(float)knight.height};
+            Rectangle knightDestinationRec{
+                knightPos.x,
+                knightPos.y,
+                4.0f * (float)knight.width/6,
+                4.0f * (float)knight.height
+            };
+            DrawTexturePro(knight, knightSourceRec, knightDestinationRec, Vector2{},0.0, WHITE);
+
+            
         EndDrawing();
     }
     CloseWindow();
     UnloadTexture(map);
-    
+    UnloadTexture(knight);
 }
