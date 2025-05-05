@@ -1,4 +1,7 @@
+#include "raylib.h"
 #include "character.h"
+#include "prop.h"
+#include "enemy.h"
 
 int main(){
     const int windowWidth{ 384 };
@@ -6,12 +9,20 @@ int main(){
     const int fps = 60;
     InitWindow(windowWidth, windowHeight, "Classy Clash");
     // Loading Character
-    Character knight;
-    knight.setScreenPos(windowHeight,windowWidth);
+    Character knight{windowHeight,windowWidth};
+    Enemy goblin{Vector2{}, LoadTexture("characters/goblin_idle_spritesheet.png"), LoadTexture("characters/goblin_run_spritesheet.png")};
+    goblin.setTarget(&knight);
 
     // Loading textures
     Texture2D map = LoadTexture("nature_tileset/OpenWorldMap24x24.png");
     Vector2 mapPos = {0.0, 0.0};
+
+    // Loading Prop
+    Prop props[2]{
+        Prop{Vector2{600.f, 300.f},LoadTexture("nature_tileset/Rock.png")},
+        Prop{Vector2{400.f, 500.f},LoadTexture("nature_tileset/Log.png")}
+    };
+
     const float mapScale = 4.f;
     SetTargetFPS(fps);
     while(!WindowShouldClose()){
@@ -20,8 +31,14 @@ int main(){
             float dt = GetFrameTime();
             mapPos = Vector2Scale(knight.getWorldPos(), -1.f);
             DrawTextureEx(map, mapPos, 0, mapScale, WHITE);
-            knight.tick(dt);
 
+            // Draw the Props
+            for (auto prop : props){
+                prop.Render(knight.getWorldPos());
+            }
+            knight.tick(dt);
+            goblin.tick(dt);
+            
             // Check map bounds
             if (
                 knight.getWorldPos().x < 0 ||
@@ -33,6 +50,17 @@ int main(){
                 // Undo frame
                 knight.undoMovement();
             }
+
+            // Check for prop collision
+            for (auto prop : props){
+                if (CheckCollisionRecs(knight.getCollisionRec(),prop.getCollisionRec(knight.getWorldPos()))){
+                    knight.undoMovement();
+                }
+                if (CheckCollisionRecs(goblin.getCollisionRec(),prop.getCollisionRec(goblin.getWorldPos()))){
+                    goblin.undoMovement();
+                }
+            }
+            
         EndDrawing();
     }
     CloseWindow();
