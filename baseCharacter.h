@@ -8,8 +8,10 @@ public:
     void undoMovement();
     Rectangle getCollisionRec();
     Vector2 getWorldPos(){return worldPos;};
+    virtual Vector2 getScreenPos() = 0;
     virtual void tick(float dt);
-
+    bool getAlive(){ return alive;};
+    void setAlive(bool isAlive){ alive = isAlive; };
 protected:
     int frame{};
     int maxFrame{6};
@@ -21,11 +23,13 @@ protected:
     Texture2D texture{};
     Texture2D idle{};
     Texture2D run{};
-    Vector2 screenPos{};
-    Vector2 worldPos{};
+    Vector2 screenPos{}; // Relative to player
+    Vector2 worldPos{};  // Relative to map
     Vector2 worldPosLastFrame{};
     float speed{4.f};
     float scale{4.f};
+    Vector2 velocity{};
+    bool alive{true};
 };
 
 #endif
